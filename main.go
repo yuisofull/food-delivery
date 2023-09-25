@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Restaurant struct {
@@ -44,9 +45,10 @@ func main() {
 		})
 	})
 
-	//POST /restaurants
+	//POST /v1/restaurants
 	v1 := r.Group("/v1")
-	v1.POST("/restaurants", func(c *gin.Context) {
+	restaurants := v1.Group("/restaurants")
+	restaurants.POST("", func(c *gin.Context) {
 		var data Restaurant
 		if err := c.ShouldBind(&data); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -59,7 +61,56 @@ func main() {
 			"data": data,
 		})
 	})
-	r.Run()
+
+	//GET/v1/restaurants/:id
+	restaurants.GET("/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		var data Restaurant
+		if err := db.Where("id = ?", id).First(&data).Error; err != nil {
+			log.Println(err)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+	})
+
+	//GET/v1/restaurants/
+	restaurants.GET("", func(c *gin.Context) {
+		var data []Restaurant
+
+		pagingData := struct {
+			Page  int `json:"page" form:"page"`
+			Limit int `json:"limit" form:"limit"`
+		}{}
+
+		if err := c.ShouldBind(&pagingData); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if pagingData.Page <= 0 {
+			pagingData.Page = 1
+		}
+		if pagingData.Limit <= 0 {
+			pagingData.Limit = 5
+		}
+		if err := db.Offset((pagingData.Page - 1) * pagingData.Limit).Limit(pagingData.Limit).Order("id desc").Find(&data).Error; err != nil {
+			log.Println(err)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+	})
+	if err := r.Run(); err != nil {
+		log.Println(err)
+	}
 	//var myRestaurant Restaurant
 	//if err := db.Where("id = ?", 3).First(&myRestaurant).Error; err != nil {
 	//	log.Println(err)
