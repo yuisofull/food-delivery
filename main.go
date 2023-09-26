@@ -101,11 +101,53 @@ func main() {
 		if pagingData.Limit <= 0 {
 			pagingData.Limit = 5
 		}
-		if err := db.Offset((pagingData.Page - 1) * pagingData.Limit).Limit(pagingData.Limit).Order("id desc").Find(&data).Error; err != nil {
+		if err := db.Offset((pagingData.Page - 1) * pagingData.Limit).
+			Limit(pagingData.Limit).
+			Order("id desc").
+			Find(&data).Error; err != nil {
 			log.Println(err)
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"data": data,
+		})
+	})
+	//Patch
+	restaurants.PATCH("/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		var data UpdateRestaurant
+		if err := c.ShouldBind(&data); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if err := db.Where("id = ?", id).Updates(&data).Error; err != nil {
+			log.Println(err)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+	})
+
+	restaurants.DELETE("/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		if err := db.Table(Restaurant{}.TableName()).Where("id = ?", id).Delete(nil).Error; err != nil {
+			log.Println(err)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": 1,
 		})
 	})
 	if err := r.Run(); err != nil {
