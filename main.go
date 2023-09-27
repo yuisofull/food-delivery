@@ -1,6 +1,7 @@
 package main
 
 import (
+	"food-delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -48,19 +49,7 @@ func main() {
 	//POST /v1/restaurants
 	v1 := r.Group("/v1")
 	restaurants := v1.Group("/restaurants")
-	restaurants.POST("", func(c *gin.Context) {
-		var data Restaurant
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		db.Create(&data)
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
+	restaurants.POST("", ginrestaurant.CreateRestaurant(db))
 
 	//GET/v1/restaurants/:id
 	restaurants.GET("/:id", func(c *gin.Context) {
