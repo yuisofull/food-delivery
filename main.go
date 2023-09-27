@@ -124,21 +124,7 @@ func main() {
 		})
 	})
 
-	restaurants.DELETE("/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		if err := db.Table(Restaurant{}.TableName()).Where("id = ?", id).Delete(nil).Error; err != nil {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data": 1,
-		})
-	})
+	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(db))
 	if err := r.Run(); err != nil {
 		log.Println(err)
 	}
