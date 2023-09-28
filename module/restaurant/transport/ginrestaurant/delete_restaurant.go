@@ -1,16 +1,17 @@
 package ginrestaurant
 
 import (
+	"food-delivery/appctx"
 	restaurantbusiness "food-delivery/module/restaurant/business"
 	restaurantstorage "food-delivery/module/restaurant/storage"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
 
-func DeleteRestaurant(db *gorm.DB) gin.HandlerFunc {
+func DeleteRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		db := ctx.GetMyDBConnection()
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"food-delivery/appctx"
 	"food-delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -46,10 +47,11 @@ func main() {
 		})
 	})
 
+	appCtx := appctx.NewAppContext(db)
 	//POST /v1/restaurants
 	v1 := r.Group("/v1")
 	restaurants := v1.Group("/restaurants")
-	restaurants.POST("", ginrestaurant.CreateRestaurant(db))
+	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
 
 	//GET/v1/restaurants/:id
 	restaurants.GET("/:id", func(c *gin.Context) {
@@ -124,7 +126,7 @@ func main() {
 		})
 	})
 
-	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(db))
+	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
 	if err := r.Run(); err != nil {
 		log.Println(err)
 	}

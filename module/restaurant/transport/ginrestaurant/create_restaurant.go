@@ -1,16 +1,17 @@
 package ginrestaurant
 
 import (
+	"food-delivery/appctx"
 	restaurantbusiness "food-delivery/module/restaurant/business"
 	restaurantmodel "food-delivery/module/restaurant/model"
 	restaurantstorage "food-delivery/module/restaurant/storage"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
-func CreateRestaurant(db *gorm.DB) gin.HandlerFunc {
+func CreateRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		db := ctx.GetMyDBConnection()
 		var data restaurantmodel.RestaurantCreate
 		if err := c.ShouldBind(&data); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
