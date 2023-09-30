@@ -10,11 +10,20 @@ import (
 	"net/http"
 )
 
-func CreateRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
+func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		db := ctx.GetMyDBConnection()
-		var data restaurantmodel.RestaurantCreate
-		if err := c.ShouldBind(&data); err != nil {
+
+		var pagingData common.Paging
+		if err := c.ShouldBind(&pagingData); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		var filter restaurantmodel.Filter
+		if err := c.ShouldBind(&filter); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
@@ -22,14 +31,16 @@ func CreateRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		store := restaurantstorage.NewSQLStore(db)
-		biz := restaurantbusiness.NewCreateRestaurantBusiness(store)
-		if err := biz.CreateRestaurant(c.Request.Context(), &data); err != nil {
+		biz := restaurantbusiness.NewListRestaurantBusiness(store)
+
+		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
+		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		c.JSON(http.StatusOK, common.SimpleNewSuccessResponse(data.Id))
+		c.JSON(http.StatusOK, common.NewSuccessResponse(result, pagingData, filter))
 	}
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"food-delivery/appctx"
+	"food-delivery/component/appctx"
 	"food-delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -72,36 +72,7 @@ func main() {
 	})
 
 	//GET/v1/restaurants/
-	restaurants.GET("", func(c *gin.Context) {
-		var data []Restaurant
-
-		pagingData := struct {
-			Page  int `json:"page" form:"page"`
-			Limit int `json:"limit" form:"limit"`
-		}{}
-
-		if err := c.ShouldBind(&pagingData); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		if pagingData.Page <= 0 {
-			pagingData.Page = 1
-		}
-		if pagingData.Limit <= 0 {
-			pagingData.Limit = 5
-		}
-		if err := db.Offset((pagingData.Page - 1) * pagingData.Limit).
-			Limit(pagingData.Limit).
-			Order("id desc").
-			Find(&data).Error; err != nil {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
+	restaurants.GET("", ginrestaurant.ListRestaurant(appCtx))
 	//Patch
 	restaurants.PATCH("/:id", func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
