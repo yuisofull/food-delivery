@@ -12,16 +12,31 @@ func (s *sqlStore) ListRestaurantWithCondition(
 	paging *common.Paging,
 	moreKeys ...string,
 ) ([]restaurantmodel.Restaurant, error) {
-	var data []restaurantmodel.Restaurant
+	var result []restaurantmodel.Restaurant
 
-	db := s.db.Where("status in (1)")
+	db := s.db.Table(restaurantmodel.Restaurant{}.TableName())
+
 	if f := filter; f != nil {
 		if f.OwnerID > 0 {
 			db = db.Where("owner_id = ?", f.OwnerID)
 		}
+		if len(f.Status) > 0 {
+			db = db.Where("status in (?)", f.Status)
+		}
 	}
-	if err := db.Find(&data).Error; err != nil {
+
+	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, err
 	}
-	return data, nil
+
+	if err := db.
+		Offset((paging.Page - 1) * paging.Limit).
+		Limit(paging.Limit).
+		Order("id desc").
+		Find(&result).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

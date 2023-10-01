@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println(db)
+	db = db.Debug()
 	//newRestaurant := Restaurant{Name: "Land", Addr: "HCM"}
 	//if err := db.Create(&newRestaurant).Error; err != nil {
 	//	log.Println(err)

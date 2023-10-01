@@ -22,6 +22,8 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 			return
 		}
 
+		pagingData.Fulfill()
+
 		var filter restaurantmodel.Filter
 		if err := c.ShouldBind(&filter); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -29,6 +31,8 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 			})
 			return
 		}
+
+		filter.Status = []int{1}
 
 		store := restaurantstorage.NewSQLStore(db)
 		biz := restaurantbusiness.NewListRestaurantBusiness(store)
