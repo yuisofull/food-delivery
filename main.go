@@ -2,6 +2,7 @@ package main
 
 import (
 	"food-delivery/component/appctx"
+	"food-delivery/middleware"
 	"food-delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -40,14 +41,16 @@ func main() {
 	//}
 	//log.Println("New id:", newRestaurant.Id)
 
+	appCtx := appctx.NewAppContext(db)
 	r := gin.Default()
+	r.Use(middleware.Recover(appCtx))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
 
-	appCtx := appctx.NewAppContext(db)
 	//POST /v1/restaurants
 	v1 := r.Group("/v1")
 	restaurants := v1.Group("/restaurants")

@@ -58,6 +58,7 @@ func (e *AppError) RootError() error {
 	}
 	return e.RootErr
 }
+
 func (e *AppError) Error() string {
 	return e.RootErr.Error()
 }
@@ -121,6 +122,14 @@ func ErrCannotDeleteEntity(entity string, err error) *AppError {
 	)
 }
 
+func ErrEntityDeleted(entity string, err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("%s already deleted", strings.ToLower(entity)),
+		fmt.Sprintf("Err%sAlreadyDeleted", entity),
+	)
+}
+
 func ErrEntityExisted(entity string, err error) *AppError {
 	return NewCustomError(
 		err,
@@ -152,3 +161,5 @@ func ErrNoPermission(err error) *AppError {
 		fmt.Sprintf("ErrNoPermission"),
 	)
 }
+
+var RecordNotFound = errors.New("record not found")
