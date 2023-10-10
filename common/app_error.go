@@ -161,5 +161,3 @@ func ErrNoPermission(err error) *AppError {
 		fmt.Sprintf("ErrNoPermission"),
 	)
 }
-
-var RecordNotFound = errors.New("record not found")

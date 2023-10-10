@@ -16,6 +16,10 @@ type Restaurant struct {
 
 func (Restaurant) TableName() string { return "restaurants" }
 
+func (r *Restaurant) Mask(isAdminOrOwner bool) {
+	r.GenUID(common.DbTypeRestaurant)
+}
+
 type RestaurantCreate struct {
 	common.SQLModel `json:",inline"`
 	Name            string `json:"name" gorm:"column:name;"`
@@ -23,6 +27,10 @@ type RestaurantCreate struct {
 }
 
 func (RestaurantCreate) TableName() string { return Restaurant{}.TableName() }
+
+func (data *RestaurantCreate) Mask(isAdminOrOwner bool) {
+	data.GenUID(common.DbTypeRestaurant)
+}
 
 func (data *RestaurantCreate) Validate() error {
 	data.Name = strings.TrimSpace(data.Name)
