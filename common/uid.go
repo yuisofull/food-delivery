@@ -2,11 +2,18 @@ package common
 
 import (
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"strconv"
 	"strings"
 )
+
+// UID is method to generate a virtual unique identifier for whole system
+// its structure contains 62 bits:  LocalID - ObjectType - ShardID
+// 32 bits for Local ID, max (2^32) - 1
+// 10 bits for Object Type
+// 18 bits for Shard ID
 
 type UID struct {
 	localID    uint32
@@ -83,6 +90,43 @@ func (uid *UID) Value() (driver.Value, error) {
 	return int64(uid.localID), nil
 }
 
-func (uid UID) Scan(value interface{}) error {
+func (uid *UID) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	var i uint32
+
+	switch t := value.(type) {
+	case int:
+		i = uint32(t)
+	case int8:
+		i = uint32(t) // standardizes across systems
+	case int16:
+		i = uint32(t) // standardizes across systems
+	case int32:
+		i = uint32(t) // standardizes across systems
+	case int64:
+		i = uint32(t) // standardizes across systems
+	case uint8:
+		i = uint32(t) // standardizes across systems
+	case uint16:
+		i = uint32(t) // standardizes across systems
+	case uint32:
+		i = t
+	case uint64:
+		i = uint32(t)
+	case []byte:
+		a, err := strconv.Atoi(string(t))
+		if err != nil {
+			return err
+		}
+		i = uint32(a)
+	default:
+		return errors.New("invalid Scan Source")
+	}
+
+	uid.localID = i
+
 	return nil
 }

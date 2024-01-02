@@ -2,8 +2,8 @@ package restaurantstorage
 
 import (
 	"context"
-	"food-delivery/common"
-	restaurantmodel "food-delivery/module/restaurant/model"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
+	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/model"
 )
 
 func (s *sqlStore) ListRestaurantWithCondition(
@@ -26,16 +26,31 @@ func (s *sqlStore) ListRestaurantWithCondition(
 	}
 
 	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, err
+		return nil, common.ErrDB(err)
+	}
+
+	if v := paging.FakeCursor; v != "" {
+		uid, err := common.FromBase58(v)
+		if err != nil {
+			return nil, common.ErrDB(err)
+		}
+		db = db.Where("id < ?", uid.GetLocalID())
+	} else {
+		db = db.Offset((paging.Page - 1) * paging.Limit)
 	}
 
 	if err := db.
-		Offset((paging.Page - 1) * paging.Limit).
 		Limit(paging.Limit).
 		Order("id desc").
 		Find(&result).
 		Error; err != nil {
-		return nil, err
+		return nil, common.ErrDB(err)
+	}
+
+	if len(result) > 0 {
+		last := result[len(result)-1]
+		last.Mask(false)
+		paging.NextCursor = last.FakeID.String()
 	}
 
 	return result, nil

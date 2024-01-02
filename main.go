@@ -1,10 +1,10 @@
 package main
 
 import (
-	"food-delivery/component/appctx"
-	"food-delivery/middleware"
-	"food-delivery/module/restaurant/transport/ginrestaurant"
 	"github.com/gin-gonic/gin"
+	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
+	"github.com/yuisofull/food-delivery-app-with-go/middleware"
+	"github.com/yuisofull/food-delivery-app-with-go/module/restaurant/transport/ginrestaurant"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"

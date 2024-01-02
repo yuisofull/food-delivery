@@ -3,8 +3,8 @@ package restaurantbusiness
 import (
 	"context"
 	"errors"
-	"food-delivery/common"
-	restaurantmodel "food-delivery/module/restaurant/model"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
+	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/model"
 )
 
 type DeleteRestaurantStore interface {

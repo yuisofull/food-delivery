@@ -2,7 +2,7 @@ package restaurantmodel
 
 import (
 	"errors"
-	"food-delivery/common"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
 	"strings"
 )
 
@@ -10,8 +10,9 @@ const EntityName = "Restaurant"
 
 type Restaurant struct {
 	common.SQLModel `json:",inline"`
-	Name            string `json:"name" gorm:"column:name;"`
-	Addr            string `json:"addr"  gorm:"column:addr"`
+	Name            string        `json:"name" gorm:"column:name;"`
+	Addr            string        `json:"addr"  gorm:"column:addr;"`
+	Logo            *common.Image `json:"logo" gorm:"column:logo;"`
 }
 
 func (Restaurant) TableName() string { return "restaurants" }
@@ -22,8 +23,9 @@ func (r *Restaurant) Mask(isAdminOrOwner bool) {
 
 type RestaurantCreate struct {
 	common.SQLModel `json:",inline"`
-	Name            string `json:"name" gorm:"column:name;"`
-	Addr            string `json:"addr"  gorm:"column:addr"`
+	Name            string        `json:"name" gorm:"column:name;"`
+	Addr            string        `json:"addr"  gorm:"column:addr"`
+	Logo            *common.Image `json:"logo" gorm:"column:logo;"`
 }
 
 func (RestaurantCreate) TableName() string { return Restaurant{}.TableName() }
@@ -41,8 +43,9 @@ func (data *RestaurantCreate) Validate() error {
 }
 
 type UpdateRestaurant struct {
-	Name *string `json:"name" gorm:"column:name;"`
-	Addr *string `json:"addr"  gorm:"column:addr"`
+	Name *string       `json:"name" gorm:"column:name;"`
+	Addr *string       `json:"addr"  gorm:"column:addr"`
+	Logo *common.Image `json:"logo" gorm:"column:logo;"`
 }
 
 func (UpdateRestaurant) TableName() string { return Restaurant{}.TableName() }

@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"food-delivery/common"
-	"food-delivery/component/appctx"
 	"github.com/gin-gonic/gin"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
+	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 )
 
 func Recover(ac appctx.AppContext) gin.HandlerFunc {

@@ -1,12 +1,12 @@
 package ginrestaurant
 
 import (
-	"food-delivery/common"
-	"food-delivery/component/appctx"
-	restaurantbusiness "food-delivery/module/restaurant/business"
-	restaurantmodel "food-delivery/module/restaurant/model"
-	restaurantstorage "food-delivery/module/restaurant/storage"
 	"github.com/gin-gonic/gin"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
+	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
+	restaurantbusiness "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/business"
+	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/model"
+	restaurantstorage "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/storage"
 	"net/http"
 )
 
