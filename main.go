@@ -5,6 +5,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/module/restaurant/transport/ginrestaurant"
+	"github.com/yuisofull/food-delivery-app-with-go/module/upload/ginupload"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -51,8 +52,14 @@ func main() {
 		})
 	})
 
+	r.Static("/static", "./static")
+
 	//POST /v1/restaurants
 	v1 := r.Group("/v1")
+
+	//POST /v1/upload
+	v1.POST("/upload", ginupload.UploadImage(appCtx))
+
 	restaurants := v1.Group("/restaurants")
 	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
 
