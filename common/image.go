@@ -16,7 +16,7 @@ type Image struct {
 	Extension string `json:"extension,omitempty" gorm:"-"`
 }
 
-func (*Image) TableName() string {
+func (Image) TableName() string {
 	return "images"
 }
 

@@ -3,7 +3,7 @@ package restaurantbusiness
 import (
 	"context"
 	"github.com/yuisofull/food-delivery-app-with-go/common"
-	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/module/restaurant/model"
+	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/model"
 )
 
 type CreateRestaurantStore interface {
