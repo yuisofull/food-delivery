@@ -50,7 +50,7 @@ func Upload(appCtx appctx.AppContext) func(*gin.Context) {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleNewSuccessResponse(img.Id))
+		c.JSON(http.StatusOK, common.SimpleNewSuccessResponse(img))
 
 		//c.SaveUploadedFile(fileHeader, fmt.Sprintf("./static/%s", fileHeader.Filename))
 		//c.JSON(200, common.SimpleSucessResponse(true))

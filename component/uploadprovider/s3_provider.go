@@ -50,7 +50,9 @@ func NewS3Provider(
 
 	return provider
 }
-
+func (*s3Provider) String() string {
+	return "S3"
+}
 func (provider *s3Provider) SaveFileUploaded(ctx context.Context, data []byte, dst string) (*common.Image, error) {
 	fileBytes := bytes.NewReader(data)
 	fileType := http.DetectContentType(data)

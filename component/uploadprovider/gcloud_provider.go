@@ -26,7 +26,9 @@ func NewGCloudProvider(
 		domain:        domain,
 	}
 }
-
+func (*gCloudProvider) String() string {
+	return "Google Cloud Storage"
+}
 func (provider *gCloudProvider) SaveFileUploaded(ctx context.Context, data []byte, dst string) (*common.Image, error) {
 	fileBytes := bytes.NewReader(data)
 	sw := provider.storageClient.Bucket(provider.bucketName).Object(dst).NewWriter(ctx)

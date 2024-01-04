@@ -55,7 +55,7 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 
 	img.Width = w
 	img.Height = h
-	img.CloudName = "s3"
+	img.CloudName = biz.provider.String()
 	img.Extension = fileExt
 
 	// Temporarily unused
