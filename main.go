@@ -1,12 +1,15 @@
 package main
 
 import (
+	"cloud.google.com/go/storage"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/uploadprovider"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/transport/ginrestaurant"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/upload/uploadtransport/ginupload"
+	"google.golang.org/api/option"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -31,6 +34,7 @@ type UpdateRestaurant struct {
 func (UpdateRestaurant) TableName() string { return Restaurant{}.TableName() }
 
 func main() {
+	//dsn := "food_delivery:123456@tcp(127.0.0.1:3306)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := os.Getenv("MYSQL_CONN_STRING")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -43,15 +47,24 @@ func main() {
 	//}
 	//log.Println("New id:", newRestaurant.Id)
 
-	s3BucketName := os.Getenv("S3BucketName")
-	s3Region := os.Getenv("S3Region")
-	s3APIKey := os.Getenv("S3APIKey")
-	s3SecretKey := os.Getenv("S3SecretKey")
-	s3Domain := os.Getenv("S3Domain")
+	//s3BucketName := os.Getenv("S3BucketName")
+	//s3Region := os.Getenv("S3Region")
+	//s3APIKey := os.Getenv("S3APIKey")
+	//s3SecretKey := os.Getenv("S3SecretKey")
+	//s3Domain := os.Getenv("S3Domain")
 
-	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+	//s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
 
-	appCtx := appctx.NewAppContext(db, s3Provider)
+	//appCtx := appctx.NewAppContext(db, s3Provider)
+
+	//storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
+	storageClient, err := storage.NewClient(context.Background(),
+		option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
+	if err != nil {
+		panic(err)
+	}
+	gcloudProvider := uploadprovider.NewGCloudProvider("food-deliver", storageClient, "")
+	appCtx := appctx.NewAppContext(db, gcloudProvider)
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
 
