@@ -14,7 +14,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -34,8 +33,8 @@ type UpdateRestaurant struct {
 func (UpdateRestaurant) TableName() string { return Restaurant{}.TableName() }
 
 func main() {
-	//dsn := "food_delivery:123456@tcp(127.0.0.1:3306)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := os.Getenv("MYSQL_CONN_STRING")
+	dsn := "food_delivery:123456@tcp(127.0.0.1:3306)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local"
+	//dsn := os.Getenv("MYSQL_CONN_STRING")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
@@ -57,13 +56,13 @@ func main() {
 
 	//appCtx := appctx.NewAppContext(db, s3Provider)
 
-	//storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
-	storageClient, err := storage.NewClient(context.Background(),
-		option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
+	storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
+	//storageClient, err := storage.NewClient(context.Background(),
+	//option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
 	if err != nil {
 		panic(err)
 	}
-	gcloudProvider := uploadprovider.NewGCloudProvider("food-deliver", storageClient, "")
+	gcloudProvider := uploadprovider.NewGCloudProvider("food-deliver", storageClient, "https://storage.googleapis.com/food-deliver")
 	appCtx := appctx.NewAppContext(db, gcloudProvider)
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
