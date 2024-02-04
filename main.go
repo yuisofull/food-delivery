@@ -1,19 +1,19 @@
 package main
 
 import (
-	"cloud.google.com/go/storage"
-	"context"
+	"encoding/csv"
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/uploadprovider"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/transport/ginrestaurant"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/upload/uploadtransport/ginupload"
-	"google.golang.org/api/option"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usertransport/ginuser"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -46,24 +46,55 @@ func main() {
 	//}
 	//log.Println("New id:", newRestaurant.Id)
 
+	//  AMAZON S3
+
+	file, err := os.Open("S3_accessKeys.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
+	// Read the CSV data
+	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1 // Allow variable number of fields
+	data, err := reader.ReadAll()
+	if err != nil {
+		panic(err)
+	}
+	s3BucketName := data[1][0]
+	s3Region := data[1][1]
+	s3Domain := data[1][2]
+	s3APIKey := data[1][3]
+	s3SecretKey := data[1][4]
+
 	//s3BucketName := os.Getenv("S3BucketName")
 	//s3Region := os.Getenv("S3Region")
 	//s3APIKey := os.Getenv("S3APIKey")
 	//s3SecretKey := os.Getenv("S3SecretKey")
 	//s3Domain := os.Getenv("S3Domain")
 
-	//s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
 
-	//appCtx := appctx.NewAppContext(db, s3Provider)
+	appCtx := appctx.NewAppContext(db, s3Provider)
 
-	storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
-	//storageClient, err := storage.NewClient(context.Background(),
-	//option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
-	if err != nil {
-		panic(err)
-	}
-	gcloudProvider := uploadprovider.NewGCloudProvider("food-deliver", storageClient, "https://storage.googleapis.com/food-deliver")
-	appCtx := appctx.NewAppContext(db, gcloudProvider)
+	//  GOOGLE CLOUD
+	//using file
+	//storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
+	//
+	////using env var
+	////storageClient, err := storage.NewClient(context.Background(),
+	////option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
+	//
+	//if err != nil {
+	//	panic(err)
+	//}
+	//gcloudProvider := uploadprovider.NewGCloudProvider("food-deliver", storageClient, "https://storage.googleapis.com/food-deliver")
+	//appCtx := appctx.NewAppContext(db, gcloudProvider)
+
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
 
@@ -80,6 +111,8 @@ func main() {
 
 	//POST /v1/upload
 	v1.POST("/upload", ginupload.Upload(appCtx))
+
+	v1.POST("/register", ginuser.Register(appCtx))
 
 	restaurants := v1.Group("/restaurants")
 	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
