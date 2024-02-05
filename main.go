@@ -70,7 +70,7 @@ func main() {
 	s3Domain := data[1][2]
 	s3APIKey := data[1][3]
 	s3SecretKey := data[1][4]
-
+	secretKey := data[1][5]
 	//s3BucketName := os.Getenv("S3BucketName")
 	//s3Region := os.Getenv("S3Region")
 	//s3APIKey := os.Getenv("S3APIKey")
@@ -79,7 +79,7 @@ func main() {
 
 	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
 
-	appCtx := appctx.NewAppContext(db, s3Provider)
+	appCtx := appctx.NewAppContext(db, s3Provider, secretKey)
 
 	//  GOOGLE CLOUD
 	//using file
@@ -114,6 +114,7 @@ func main() {
 
 	v1.POST("/register", ginuser.Register(appCtx))
 
+	v1.POST("/authenticate", ginuser.Login(appCtx))
 	restaurants := v1.Group("/restaurants")
 	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
 
