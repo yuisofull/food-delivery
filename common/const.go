@@ -10,6 +10,10 @@ const (
 	DbTypeUser       = 2
 )
 
+const (
+	CurrentUser = "user"
+)
+
 var (
 	RecordNotFound = errors.New("record not found")
 )
