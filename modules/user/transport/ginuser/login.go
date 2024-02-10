@@ -7,8 +7,8 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/hasher"
 	"github.com/yuisofull/food-delivery-app-with-go/component/tokenprovider/jwt"
 	userbiz "github.com/yuisofull/food-delivery-app-with-go/modules/user/biz"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/store"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usermodel"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/userstorage"
 	"net/http"
 )
 
@@ -23,7 +23,7 @@ func Login(appCtx appctx.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMyDBConnection()
 		tokenProvider := jwt.NewTokenJWTProvider(appCtx.GetSecretKey()) //appctx.SecretKey()
 
-		store := userstorage.NewSQLStore(db)
+		store := store.NewSQLStore(db)
 		md5 := hasher.NewMd5Hash()
 
 		biz := userbiz.NewLoginBusiness(appCtx, store, 60*60*24*30, tokenProvider, md5)

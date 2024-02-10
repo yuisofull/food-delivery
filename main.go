@@ -8,7 +8,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/transport/ginrestaurant"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/upload/uploadtransport/ginupload"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usertransport/ginuser"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/transport/ginuser"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -118,7 +118,7 @@ func main() {
 
 	v1.GET("/profile", middleware.RequireAuth(appCtx), ginuser.GetProfile(appCtx))
 
-	restaurants := v1.Group("/restaurants")
+	restaurants := v1.Group("/restaurants", middleware.RequireAuth(appCtx))
 	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
 
 	//GET/v1/restaurants/:id
@@ -166,6 +166,13 @@ func main() {
 	})
 
 	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
+
+	admin := v1.Group("/admin", middleware.RequireAuth(appCtx), middleware.CheckRole(appCtx, "admin"))
+
+	{
+		admin.GET("/profile", ginuser.GetProfile(appCtx))
+	}
+
 	if err := r.Run(); err != nil {
 		log.Println(err)
 	}

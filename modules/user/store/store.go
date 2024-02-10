@@ -1,4 +1,4 @@
-package userstorage
+package store
 
 import "gorm.io/gorm"
 

@@ -4,7 +4,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 )
 
-const EntityName = "User"
+const EntityName = "UserID"
 
 type UserCreate struct {
 	common.SQLModel `json:",inline"`

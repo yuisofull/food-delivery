@@ -12,6 +12,7 @@ import (
 
 func CreateRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
 		db := ctx.GetMyDBConnection()
 
 		var data restaurantmodel.RestaurantCreate
@@ -19,7 +20,7 @@ func CreateRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 		if err := c.ShouldBind(&data); err != nil {
 			panic(err)
 		}
-
+		data.UserId = requester.GetUserId()
 		store := restaurantstorage.NewSQLStore(db)
 		biz := restaurantbusiness.NewCreateRestaurantBusiness(store)
 

@@ -133,7 +133,7 @@ func ErrEntityDeleted(entity string, err error) *AppError {
 func ErrEntityExisted(entity string, err error) *AppError {
 	return NewCustomError(
 		err,
-		fmt.Sprintf("User already exists %s", strings.ToLower(entity)),
+		fmt.Sprintf("UserID already exists %s", strings.ToLower(entity)),
 		fmt.Sprintf("ErrUserAlreadyExists%s", entity),
 	)
 }

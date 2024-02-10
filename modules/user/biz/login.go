@@ -80,7 +80,7 @@ func (biz *loginBusiness) Login(ctx context.Context, data *usermodel.UserLogin) 
 	//	return nil, common.ErrInternal(err)
 	//}
 	//
-	//account := usermodel.NewAccount(accessToken, refreshToken)
+	//account := model.NewAccount(accessToken, refreshToken)
 
 	return accessToken, nil
 }
