@@ -6,15 +6,11 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/uploadprovider"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/transport/ginrestaurant"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/upload/uploadtransport/ginupload"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/transport/ginuser"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 type Restaurant struct {
@@ -40,14 +36,8 @@ func main() {
 		log.Fatalln(err)
 	}
 	db = db.Debug()
-	//newRestaurant := Restaurant{Name: "Land", Addr: "HCM"}
-	//if err := db.Create(&newRestaurant).Error; err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println("New id:", newRestaurant.Id)
 
 	//  AMAZON S3
-
 	file, err := os.Open("S3_accessKeys.csv")
 	if err != nil {
 		panic(err)
@@ -82,10 +72,10 @@ func main() {
 	appCtx := appctx.NewAppContext(db, s3Provider, secretKey)
 
 	//  GOOGLE CLOUD
-	//using file
+	// Using file
 	//storageClient, err := storage.NewClient(context.Background(), option.WithCredentialsFile("key.json"))
 	//
-	////using env var
+	// Using env var
 	////storageClient, err := storage.NewClient(context.Background(),
 	////option.WithCredentialsJSON([]byte(os.Getenv("GCLOUD_STORAGE_CREDENTIAL"))))
 	//
@@ -109,93 +99,10 @@ func main() {
 	//POST /v1/restaurants
 	v1 := r.Group("/v1")
 
-	//POST /v1/upload
-	v1.POST("/upload", ginupload.Upload(appCtx))
-
-	v1.POST("/register", ginuser.Register(appCtx))
-
-	v1.POST("/authenticate", ginuser.Login(appCtx))
-
-	v1.GET("/profile", middleware.RequireAuth(appCtx), ginuser.GetProfile(appCtx))
-
-	restaurants := v1.Group("/restaurants", middleware.RequireAuth(appCtx))
-	restaurants.POST("", ginrestaurant.CreateRestaurant(appCtx))
-
-	//GET/v1/restaurants/:id
-	restaurants.GET("/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		var data Restaurant
-		if err := db.Where("id = ?", id).First(&data).Error; err != nil {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	//GET/v1/restaurants/
-	restaurants.GET("", ginrestaurant.ListRestaurant(appCtx))
-	//Patch
-	restaurants.PATCH("/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		var data UpdateRestaurant
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		if err := db.Where("id = ?", id).Updates(&data).Error; err != nil {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
-
-	admin := v1.Group("/admin", middleware.RequireAuth(appCtx), middleware.CheckRole(appCtx, "admin"))
-
-	{
-		admin.GET("/profile", ginuser.GetProfile(appCtx))
-	}
+	setupRoute(appCtx, v1)
+	setupAdminRoute(appCtx, v1)
 
 	if err := r.Run(); err != nil {
 		log.Println(err)
 	}
-	//var myRestaurant Restaurant
-	//if err := db.Where("id = ?", 3).First(&myRestaurant).Error; err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println(myRestaurant)
-	//
-	//myRestaurant.Name = "cali"
-	//if err := db.Where("id = ?", 3).Updates(&myRestaurant).Error; err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println(myRestaurant)
-	//
-	//newName := ""
-	//updateData := UpdateRestaurant{Name: &newName}
-	//if err := db.Where("id = ?", 3).Updates(&updateData).Error; err != nil {
-	//	log.Println(err)
-	//}
-	//log.Println(myRestaurant)
-	//
-	//if err := db.Table(Restaurant{}.TableName()).Where("id = ?", 1).Delete(nil).Error; err != nil {
-	//	log.Println(err)
-	//}
 }
