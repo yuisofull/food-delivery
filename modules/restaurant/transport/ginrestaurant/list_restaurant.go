@@ -6,6 +6,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	restaurantbusiness "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/business"
 	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/model"
+	restaurantrepo "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/repository"
 	restaurantstorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/storage"
 	restaurantlikestorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/store"
 	"net/http"
@@ -31,7 +32,8 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 
 		store := restaurantstorage.NewSQLStore(db)
 		likeStore := restaurantlikestorage.NewSQLStore(db)
-		biz := restaurantbusiness.NewListRestaurantBusiness(store, likeStore)
+		repo := restaurantrepo.NewListRestaurantRepo(store, likeStore)
+		biz := restaurantbusiness.NewListRestaurantBusiness(repo)
 
 		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
 		if err != nil {

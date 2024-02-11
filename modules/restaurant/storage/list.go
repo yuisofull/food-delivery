@@ -7,7 +7,7 @@ import (
 )
 
 func (s *sqlStore) ListRestaurantWithCondition(
-	context context.Context,
+	ctx context.Context,
 	filter *restaurantmodel.Filter,
 	paging *common.Paging,
 	moreKeys ...string,
