@@ -67,14 +67,14 @@ func (biz *loginBusiness) Login(ctx context.Context, data *usermodel.UserLogin) 
 		Role:   user.Role,
 	}
 
-	//biz.tokenConfig.GetAtExp() ===> biz.expiry
+	//business.tokenConfig.GetAtExp() ===> business.expiry
 	accessToken, err := biz.tokenProvider.Generate(payload, biz.expiry)
 
 	if err != nil {
 		return nil, common.ErrInternal(err)
 	}
 
-	//refreshToken, err := biz.tokenProvider.Generate(payload, biz.expiry)
+	//refreshToken, err := business.tokenProvider.Generate(payload, business.expiry)
 	//
 	//if err != nil {
 	//	return nil, common.ErrInternal(err)

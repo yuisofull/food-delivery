@@ -5,7 +5,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/hasher"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/biz"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/business"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/store"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usermodel"
 	"net/http"

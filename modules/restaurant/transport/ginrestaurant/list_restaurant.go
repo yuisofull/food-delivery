@@ -7,6 +7,7 @@ import (
 	restaurantbusiness "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/business"
 	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/model"
 	restaurantstorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/storage"
+	restaurantlikestorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/store"
 	"net/http"
 )
 
@@ -29,7 +30,8 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 		filter.Status = []int{1}
 
 		store := restaurantstorage.NewSQLStore(db)
-		biz := restaurantbusiness.NewListRestaurantBusiness(store)
+		likeStore := restaurantlikestorage.NewSQLStore(db)
+		biz := restaurantbusiness.NewListRestaurantBusiness(store, likeStore)
 
 		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
 		if err != nil {

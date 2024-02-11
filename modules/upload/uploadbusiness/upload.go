@@ -59,7 +59,7 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 	img.Extension = fileExt
 
 	// Temporarily unused
-	//if err := biz.imageStore.CreateImage(ctx, img); err != nil {
+	//if err := business.imageStore.CreateImage(ctx, img); err != nil {
 	//	return nil, uploadmodel.ErrCannotSaveFile(err)
 	//}
 
