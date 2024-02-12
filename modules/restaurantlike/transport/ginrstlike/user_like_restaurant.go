@@ -10,8 +10,7 @@ import (
 	"net/http"
 )
 
-// POST /v1/restaurants/:id/like
-
+// UserLikeRestaurant : POST /v1/restaurants/:id/liked-users
 func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, err := common.FromBase58(c.Param("id"))
