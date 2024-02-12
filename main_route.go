@@ -5,6 +5,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/transport/ginrestaurant"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/transport/ginrstlike"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/upload/uploadtransport/ginupload"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/transport/ginuser"
 	"log"
@@ -72,4 +73,7 @@ func setupRoute(appCtx appctx.AppContext, v1 *gin.RouterGroup) {
 	})
 
 	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
+
+	restaurants.POST("/like/:id", ginrstlike.UserLikeRestaurant(appCtx))
+	restaurants.DELETE("/dislike/:id", ginrstlike.UserDislikeRestaurant(appCtx))
 }

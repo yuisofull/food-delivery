@@ -1,0 +1,39 @@
+package ginrstlike
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
+	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
+	restaurantlikebiz "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/business"
+	restaurantlikemodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/model"
+	restaurantlikestorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/store"
+	"net/http"
+)
+
+// POST /v1/restaurants/:id/dislike
+
+func UserDislikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, err := common.FromBase58(c.Param("id"))
+
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		requester := c.MustGet(common.CurrentUser).(common.Requester)
+
+		data := restaurantlikemodel.Like{
+			RestaurantId: int(uid.GetLocalID()),
+			UserId:       requester.GetUserId(),
+		}
+
+		store := restaurantlikestorage.NewSQLStore(appCtx.GetMyDBConnection())
+		biz := restaurantlikebiz.NewUserDislikeRestaurantBiz(store)
+
+		if err = biz.DislikeRestaurant(c.Request.Context(), &data); err != nil {
+			panic(err)
+		}
+
+		c.JSON(http.StatusOK, common.SimpleNewSuccessResponse(true))
+	}
+}
