@@ -60,8 +60,6 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 	//	db = db.Preload(moreKeys[i])
 	//}
 
-	db = db.Preload("User")
-
 	if v := paging.FakeCursor; v != "" {
 		timeCreated, err := time.Parse(timeLayout, string(base58.Decode(v)))
 
@@ -70,13 +68,13 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 		}
 
 		// format with timeLayoutNoSecond: becuz SQL just understand this format for time "2006-01-02T15:04:05"
-		db = db.Where("created_at < ?", timeCreated.Format(timeLayoutNoSecond))
+		db = db.Where("created_at < ?", timeCreated.Format(timeLayout))
 	} else {
 		offset := (paging.Page - 1) * paging.Limit
 		db = db.Offset(int(offset))
 
 	}
-
+	db = db.Preload("User")
 	if err := db.
 		Limit(int(paging.Limit)).
 		Order("created_at desc").
@@ -86,12 +84,13 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 
 	users := make([]common.SimpleUser, len(result))
 
-	for i, item := range result {
-		result[i].User.CreatedAt = item.CreatedAt
+	for i := range result {
+		//result[i].User = &common.SimpleUser{}
+		result[i].User.CreatedAt = result[i].CreatedAt
 		result[i].User.UpdatedAt = nil
 		users[i] = *result[i].User // when len of two arr not equal (mean: user may is null) => system crashing
 		if i == len(result)-1 {
-			cursorStr := base58.Encode([]byte(fmt.Sprintf("%v", item.CreatedAt.Format(timeLayout))))
+			cursorStr := base58.Encode([]byte(fmt.Sprintf("%v", result[i].CreatedAt.Format(timeLayout))))
 			paging.NextCursor = cursorStr
 		}
 	}

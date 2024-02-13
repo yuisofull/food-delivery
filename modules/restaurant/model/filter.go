@@ -1,6 +1,7 @@
 package restaurantmodel
 
 type Filter struct {
-	OwnerID string `json:"owner_id,omitempty" form:"owner_id"`
-	Status  []int  `json:"-"`
+	FakeOwnerID string `json:"-" form:"owner_id"`
+	OwnerID     int    `json:"owner_id,omitempty" form:"-"`
+	Status      []int  `json:"-"`
 }

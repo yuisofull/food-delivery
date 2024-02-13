@@ -74,8 +74,7 @@ func setupRoute(appCtx appctx.AppContext, v1 *gin.RouterGroup) {
 
 	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
 
-	restaurants.POST("/liked-users/:id", ginrstlike.UserLikeRestaurant(appCtx))
-	restaurants.DELETE("/liked-users/:id", ginrstlike.UserDislikeRestaurant(appCtx))
-
-	// GET /v1/restaurants/:id/liked-users
+	restaurants.POST("/:id/liked-users", ginrstlike.UserLikeRestaurant(appCtx))
+	restaurants.DELETE("/:id/liked-users", ginrstlike.UserDislikeRestaurant(appCtx))
+	restaurants.GET("/:id/liked-users", ginrstlike.ListUsersLikeRestaurant(appCtx))
 }

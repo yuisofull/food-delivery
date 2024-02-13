@@ -28,6 +28,13 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
+		uid, err := common.FromBase58(filter.FakeOwnerID)
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		filter.OwnerID = int(uid.GetLocalID())
+
 		filter.Status = []int{1}
 
 		store := restaurantstorage.NewSQLStore(db)

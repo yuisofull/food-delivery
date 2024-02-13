@@ -16,13 +16,9 @@ func (s *sqlStore) ListRestaurantWithCondition(
 
 	db := s.db.Table(restaurantmodel.Restaurant{}.TableName())
 
-	if f := filter; f != nil && f.OwnerID != "" {
-		uid, err := common.FromBase58(f.OwnerID)
-		if err != nil {
-			return nil, common.ErrDB(err)
-		}
-		if uid.GetLocalID() > 0 {
-			db = db.Where("user_id = ?", uid.GetLocalID())
+	if f := filter; f != nil {
+		if f.OwnerID > 0 {
+			db = db.Where("user_id = ?", f.OwnerID)
 		}
 		if len(f.Status) > 0 {
 			db = db.Where("status in (?)", f.Status)

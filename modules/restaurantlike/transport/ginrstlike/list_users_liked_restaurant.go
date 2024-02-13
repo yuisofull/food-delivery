@@ -10,8 +10,8 @@ import (
 	"net/http"
 )
 
-// UserLikeRestaurant : POST /v1/restaurants/:id/liked-users
-func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
+// ListUsersLikeRestaurant : GET /v1/restaurants/:id/liked-users
+func ListUsersLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uid, err := common.FromBase58(c.Param("id"))
 
@@ -19,20 +19,35 @@ func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUser).(common.Requester)
-
-		data := restaurantlikemodel.Like{
+		filter := restaurantlikemodel.Filter{
 			RestaurantId: int(uid.GetLocalID()),
-			UserId:       requester.GetUserId(),
 		}
+
+		var paging common.Paging
+
+		if err := c.ShouldBind(&paging); err != nil {
+			panic(common.ErrInvalidRequest(err))
+		}
+
+		paging.Fulfill()
+
+		//myArr := []string{}
+		//
+		//fmt.Println(myArr[0])
 
 		store := restaurantlikestorage.NewSQLStore(appCtx.GetMyDBConnection())
-		biz := restaurantlikebiz.NewUsersLikeRestaurantBiz(store)
+		biz := restaurantlikebiz.NewListUsersLikeRestaurantBiz(store)
 
-		if err = biz.LikeRestaurant(c.Request.Context(), &data); err != nil {
-			panic(err)
+		users, err := biz.ListUsers(c.Request.Context(), &filter, &paging)
+
+		if err != nil {
+			panic(common.ErrInvalidRequest(err))
 		}
 
-		c.JSON(http.StatusOK, common.SimpleNewSuccessResponse(true))
+		for i := range users {
+			users[i].Mask(false)
+		}
+
+		c.JSON(http.StatusOK, common.NewSuccessResponse(users, paging, filter))
 	}
 }

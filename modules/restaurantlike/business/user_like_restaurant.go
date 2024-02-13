@@ -13,7 +13,7 @@ type userLikeRestaurantBiz struct {
 	store UserLikeRestaurantStore
 }
 
-func NewUserLikeRestaurantBiz(
+func NewUsersLikeRestaurantBiz(
 	store UserLikeRestaurantStore,
 ) *userLikeRestaurantBiz {
 	return &userLikeRestaurantBiz{
