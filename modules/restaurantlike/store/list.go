@@ -6,11 +6,9 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	restaurantlikemodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/model"
-	"time"
 )
 
 var timeLayout = "2006-01-02T15:04:05.99999"
-var timeLayoutNoSecond = "2006-01-02T15:04:05"
 
 func (s *sqlStore) GetRestaurantLikes(ctx context.Context, ids []int) (map[int]int, error) {
 	result := make(map[int]int)
@@ -59,22 +57,16 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 	//for i := range moreKeys {
 	//	db = db.Preload(moreKeys[i])
 	//}
+	db = db.Preload("User")
 
 	if v := paging.FakeCursor; v != "" {
-		timeCreated, err := time.Parse(timeLayout, string(base58.Decode(v)))
-
-		if err != nil {
-			return nil, common.ErrDB(err)
-		}
-
-		// format with timeLayoutNoSecond: becuz SQL just understand this format for time "2006-01-02T15:04:05"
-		db = db.Where("created_at < ?", timeCreated.Format(timeLayout))
+		db = db.Where("created_at < ?", base58.Decode(v))
 	} else {
 		offset := (paging.Page - 1) * paging.Limit
 		db = db.Offset(int(offset))
 
 	}
-	db = db.Preload("User")
+
 	if err := db.
 		Limit(int(paging.Limit)).
 		Order("created_at desc").
@@ -89,10 +81,10 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 		result[i].User.CreatedAt = result[i].CreatedAt
 		result[i].User.UpdatedAt = nil
 		users[i] = *result[i].User // when len of two arr not equal (mean: user may is null) => system crashing
-		if i == len(result)-1 {
-			cursorStr := base58.Encode([]byte(fmt.Sprintf("%v", result[i].CreatedAt.Format(timeLayout))))
-			paging.NextCursor = cursorStr
-		}
+	}
+	if len(result) > 0 {
+		cursorStr := base58.Encode([]byte(fmt.Sprintf("%v", result[len(result)-1].CreatedAt.Format(timeLayout))))
+		paging.NextCursor = cursorStr
 	}
 
 	return users, nil

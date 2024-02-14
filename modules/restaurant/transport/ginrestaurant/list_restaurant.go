@@ -8,7 +8,6 @@ import (
 	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/model"
 	restaurantrepo "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/repository"
 	restaurantstorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/storage"
-	restaurantlikestorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/store"
 	"net/http"
 )
 
@@ -28,18 +27,17 @@ func ListRestaurant(ctx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		uid, err := common.FromBase58(filter.FakeOwnerID)
-		if err != nil {
-			panic(common.ErrInvalidRequest(err))
+		if filter.FakeOwnerID != "" {
+			uid, err := common.FromBase58(filter.FakeOwnerID)
+			if err != nil {
+				panic(common.ErrInvalidRequest(err))
+			}
+			filter.OwnerID = int(uid.GetLocalID())
 		}
-
-		filter.OwnerID = int(uid.GetLocalID())
-
 		filter.Status = []int{1}
 
 		store := restaurantstorage.NewSQLStore(db)
-		likeStore := restaurantlikestorage.NewSQLStore(db)
-		repo := restaurantrepo.NewListRestaurantRepo(store, likeStore)
+		repo := restaurantrepo.NewListRestaurantRepo(store)
 		biz := restaurantbusiness.NewListRestaurantBusiness(repo)
 
 		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
