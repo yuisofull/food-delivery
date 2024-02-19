@@ -19,8 +19,7 @@ type Job interface {
 }
 
 const (
-	defaultMaxTimeout    = time.Second * 10
-	defaultMaxRetryCount = 3
+	defaultMaxTimeout = time.Second * 10
 )
 
 var (
