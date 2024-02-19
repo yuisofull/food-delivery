@@ -2,6 +2,7 @@ package restaurantlikebiz
 
 import (
 	"context"
+	"github.com/yuisofull/food-delivery-app-with-go/common"
 	restaurantlikemodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/model"
 	"log"
 )
@@ -37,8 +38,12 @@ func (biz *userLikeRestaurantBiz) LikeRestaurant(
 		return restaurantlikemodel.ErrCannotLikeRestaurant(err)
 	}
 
-	if err := biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId); err != nil {
-		log.Println(err)
-	}
+	go func() {
+		defer common.AppRecover()
+		if err := biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	return nil
 }
