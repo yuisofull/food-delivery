@@ -2,7 +2,7 @@ package restaurantlikebiz
 
 import (
 	"context"
-	"github.com/yuisofull/food-delivery-app-with-go/common"
+	"github.com/yuisofull/food-delivery-app-with-go/component/asyncjob"
 	restaurantlikemodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/model"
 	"log"
 )
@@ -39,11 +39,14 @@ func (biz *userDislikeRestaurantBiz) DislikeRestaurant(
 		return restaurantlikemodel.ErrCannotDislikeRestaurant(err)
 	}
 
-	go func() {
-		defer common.AppRecover()
-		if err := biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId); err != nil {
-			log.Println(err)
-		}
-	}()
+	// Side effects
+	job := asyncjob.NewJob(func(ctx context.Context) error {
+		return biz.decStore.DecreaseLikeCount(ctx, data.RestaurantId)
+
+	})
+
+	if err := asyncjob.NewGroup(true, job).Run(ctx); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
