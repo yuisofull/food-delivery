@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
-	restaurantstorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/storage"
 	restaurantlikebiz "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/business"
 	restaurantlikemodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/model"
 	restaurantlikestorage "github.com/yuisofull/food-delivery-app-with-go/modules/restaurantlike/store"
@@ -29,8 +28,7 @@ func UserDislikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		store := restaurantlikestorage.NewSQLStore(appCtx.GetMyDBConnection())
-		decStore := restaurantstorage.NewSQLStore(appCtx.GetMyDBConnection())
-		biz := restaurantlikebiz.NewUserDislikeRestaurantBiz(store, decStore)
+		biz := restaurantlikebiz.NewUserDislikeRestaurantBiz(store, appCtx.GetPubSub())
 
 		if err = biz.DislikeRestaurant(c.Request.Context(), &data); err != nil {
 			panic(err)

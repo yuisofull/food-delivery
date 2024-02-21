@@ -14,6 +14,11 @@ const (
 	CurrentUser = "user"
 )
 
+const (
+	TopicUserLikeRestaurant    = "TopicUserLikeRestaurant"
+	TopicUserDislikeRestaurant = "TopicUserDislikeRestaurant"
+)
+
 var (
 	RecordNotFound = errors.New("record not found")
 )

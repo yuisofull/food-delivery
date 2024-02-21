@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/uploadprovider"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
+	"github.com/yuisofull/food-delivery-app-with-go/pubsub/localpubsub"
+	"github.com/yuisofull/food-delivery-app-with-go/subscriber"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -38,7 +41,7 @@ func main() {
 	db = db.Debug()
 
 	//  AMAZON S3
-	file, err := os.Open("S3_accessKeys.csv")
+	file, err := os.Open("s3_access_keys.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -68,8 +71,11 @@ func main() {
 	//s3Domain := os.Getenv("S3Domain")
 
 	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+	ps := localpubsub.NewPubsub()
+	appCtx := appctx.NewAppContext(db, s3Provider, secretKey, ps)
 
-	appCtx := appctx.NewAppContext(db, s3Provider, secretKey)
+	// setup subscribers
+	subscriber.Setup(appCtx, context.Background())
 
 	//  GOOGLE CLOUD
 	// Using file
