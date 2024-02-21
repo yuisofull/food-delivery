@@ -2,5 +2,4 @@
 .idea
 ./key.json
 key.json
-./S3_accessKeys.csv
-S3_accessKeys.csv
+./s3_access_keys.csv
