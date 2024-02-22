@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/csv"
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
@@ -75,7 +74,8 @@ func main() {
 	appCtx := appctx.NewAppContext(db, s3Provider, secretKey, ps)
 
 	// setup subscribers
-	subscriber.Setup(appCtx, context.Background())
+	//subscriber.Setup(appCtx, context.Background())
+	_ = subscriber.NewEngine(appCtx).Start()
 
 	//  GOOGLE CLOUD
 	// Using file
