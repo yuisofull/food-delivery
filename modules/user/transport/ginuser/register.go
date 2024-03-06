@@ -6,8 +6,8 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/hasher"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/business"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/store"
 	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usermodel"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/userstore"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func Register(appCtx appctx.AppContext) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 		}
 
-		store := store.NewSQLStore(db)
+		store := userstore.NewSQLStore(db)
 		md5 := hasher.NewMd5Hash()
 		repo := userbiz.NewRegisterBusiness(store, md5)
 

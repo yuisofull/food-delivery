@@ -7,7 +7,7 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/tokenprovider/jwt"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/store"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/userstore"
 	"strings"
 )
 
@@ -44,7 +44,7 @@ func RequireAuth(appCtx appctx.AppContext) func(ctx *gin.Context) {
 
 		db := appCtx.GetMyDBConnection()
 
-		store := store.NewSQLStore(db)
+		store := userstore.NewSQLStore(db)
 
 		payload, err := tokenProvider.Validate(token)
 
