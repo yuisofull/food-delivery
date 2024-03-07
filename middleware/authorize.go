@@ -1,15 +1,20 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	"github.com/yuisofull/food-delivery-app-with-go/component/appctx"
 	"github.com/yuisofull/food-delivery-app-with-go/component/tokenprovider/jwt"
-	"github.com/yuisofull/food-delivery-app-with-go/modules/user/userstore"
+	"github.com/yuisofull/food-delivery-app-with-go/modules/user/usermodel"
 	"strings"
 )
+
+type AuthenStore interface {
+	FindUser(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*usermodel.User, error)
+}
 
 func ErrWrongAuthHeader(err error) *common.AppError {
 	return common.NewCustomError(
@@ -31,7 +36,7 @@ func extractTokenFromHeaderString(s string) (string, error) {
 // RequireAuth 1. Get token from header
 // 2. Validate token and parse to payload
 // 3. From the token payload, we use user_id to find from DB
-func RequireAuth(appCtx appctx.AppContext) func(ctx *gin.Context) {
+func RequireAuth(appCtx appctx.AppContext, authStore AuthenStore) func(ctx *gin.Context) {
 
 	tokenProvider := jwt.NewTokenJWTProvider(appCtx.GetSecretKey())
 
@@ -42,22 +47,21 @@ func RequireAuth(appCtx appctx.AppContext) func(ctx *gin.Context) {
 			panic(err)
 		}
 
-		db := appCtx.GetMyDBConnection()
-
-		store := userstore.NewSQLStore(db)
+		//db := appCtx.GetMyDBConnection()
+		//store := userstore.NewSQLStore(db)
 
 		payload, err := tokenProvider.Validate(token)
-
 		if err != nil {
 			panic(err)
 		}
 
-		user, err := store.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+		//user, err := store.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+		//if err != nil {
+		//	//c.AbortWithStatusJSON(http.StatusUnauthorized, err)
+		//	panic(err)
+		//}
 
-		if err != nil {
-			//c.AbortWithStatusJSON(http.StatusUnauthorized, err)
-			panic(err)
-		}
+		user, err := authStore.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
 
 		if user.Status == 0 {
 			panic(common.ErrNoPermission(errors.New("user has been deleted or banned")))
