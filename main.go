@@ -7,7 +7,11 @@ import (
 	"github.com/yuisofull/food-delivery-app-with-go/component/uploadprovider"
 	"github.com/yuisofull/food-delivery-app-with-go/middleware"
 	"github.com/yuisofull/food-delivery-app-with-go/pubsub/localpubsub"
+	skio "github.com/yuisofull/food-delivery-app-with-go/socketio"
 	"github.com/yuisofull/food-delivery-app-with-go/subscriber"
+	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -31,8 +35,9 @@ type UpdateRestaurant struct {
 func (UpdateRestaurant) TableName() string { return Restaurant{}.TableName() }
 
 func main() {
-	dsn := "food_delivery:123456@tcp(127.0.0.1:3306)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local"
-	//dsn := os.Getenv("MYSQL_CONN_STRING")
+	dsn := os.Getenv("MYSQL_CONN_STRING")
+	//dsn := "food_delivery:123456@tcp(127.0.0.1:3306)/food_delivery?charset=utf8mb4&parseTime=True&loc=Local"
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
@@ -92,6 +97,9 @@ func main() {
 	//appCtx := appctx.NewAppContext(db, gcloudProvider)
 
 	r := gin.Default()
+
+	r.StaticFile("/demo/", "./demo.html")
+
 	r.Use(middleware.Recover(appCtx))
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -108,7 +116,40 @@ func main() {
 	setupRoute(appCtx, v1)
 	setupAdminRoute(appCtx, v1)
 
-	if err := r.Run(); err != nil {
+	rtEngine := skio.NewEngine()
+
+	appCtx.SetRealtimeEngine(rtEngine)
+
+	if err := rtEngine.Run(appCtx, r); err != nil {
 		log.Println(err)
 	}
+
+	// Config exporter Jaeger
+	agentEndpointURI := "localhost:6831"
+
+	je, err := jaeger.NewExporter(jaeger.Options{
+		AgentEndpoint: agentEndpointURI,
+		// CollectorEndpoint: collectorEndpointURI,
+		// ServiceName:       "demo",
+		Process: jaeger.Process{ServiceName: "Food-Delivery"},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	trace.RegisterExporter(je)
+	trace.ApplyConfig(trace.Config{
+		DefaultSampler: trace.ProbabilitySampler(1),
+	})
+
+	err = http.ListenAndServe(":8080", &ochttp.Handler{
+		Handler: r,
+	})
+	if err != nil {
+		log.Println(err)
+	}
+	//if err := r.Run(); err != nil {
+	//	log.Println(err)
+	//}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/yuisofull/food-delivery-app-with-go/common"
 	restaurantmodel "github.com/yuisofull/food-delivery-app-with-go/modules/restaurant/model"
+	"go.opencensus.io/trace"
 )
 
 type ListRestaurantRepo interface {
@@ -28,7 +29,11 @@ func (biz *listRestaurantRepo) ListRestaurant(
 	paging *common.Paging,
 	moreKeys ...string) ([]restaurantmodel.Restaurant, error) {
 
-	result, err := biz.repo.ListRestaurant(ctx, filter, paging)
+	ctx1, span := trace.StartSpan(ctx, "List Restaurant Business")
+
+	result, err := biz.repo.ListRestaurant(ctx1, filter, paging)
+
+	span.End()
 
 	if err != nil {
 		return nil, common.ErrCannotListEntity(restaurantmodel.EntityName, err)
